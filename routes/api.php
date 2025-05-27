@@ -12,6 +12,7 @@ Route::controller(AuthController::class)->group(function (){
                     
                 Route::get('/' , 'getUserDetails');
                 Route::post('/logout' , 'logoutUser');
+                Route::post('/edit' , 'editUser');
 
 
             });

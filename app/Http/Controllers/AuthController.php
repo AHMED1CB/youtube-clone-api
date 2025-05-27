@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
@@ -13,7 +12,7 @@ class AuthController extends Controller
     public function getUserDetails(){
 
         return Response::push([
-            'user' => request()->user, 
+            'user' => request()->user
         ] , 200 , 'Success');
 
     }
@@ -80,15 +79,69 @@ class AuthController extends Controller
 
     }
 
-    public function logoutUser(Request $request){
+    public function logoutUser(){
         
         // Delete All Tokens
 
-        $request->user->tokens->each(fn($token) => $token->delete());
+        request()->user->tokens->each(fn($token) => $token->delete()); // Logout From All Devices
 
         return Response::push( [],  202 , 'Logout Success');
 
     }
 
+
+    public function editUser(){
+
+        $check = Validator::make(request()->all() , [
+            'username' => ['unique:users'  , 'min:3' , 'max:255'],
+            'name' =>     ['min:3' , 'max:255'],
+            'profile_photo' => ['image' , 'max:5120', 'mimes:jpeg,png']
+        ]);
+
+
+        if ($check->fails()){
+
+            return Response::push( [
+                'errors' => $check->errors()
+            ], 400 ,'Invalid Profile Data');
+        
+        }
+
+
+        $keys = ['username' , 'name'];
+
+        $finalData = [];
+
+        foreach ($keys as $key ) {
+
+            if (request()->has($key)){
+
+                $finalData[$key] = request()->input($key);
+            }
+
+        }
+
+        if (request()->hasFile('profile_photo')){
+            $photoPath = request()->file('profile_photo')->store('users' , 'public');
+            
+            if ($photoPath){
+                $finalData['profile_photo'] = $photoPath;
+            }else{
+                 return Response::push(status: 400 , message:'Invalid Profile Photo ');
+            }
+
+        }
+
+
+        // Updating User Data;
+
+        request()->user->update($finalData);
+
+        return Response::push([
+            'data' => $finalData
+        ] , 200 , 'User Updated Success');
+
+
+    }
 
 }
