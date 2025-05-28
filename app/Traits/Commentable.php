@@ -4,5 +4,7 @@ namespace App\Traits;
 
 trait Commentable
 {
-    // Soon
+    public function comments(){
+        return $this->morphMany(App\Models\Comment::class, 'commentable');
+    }
 }
