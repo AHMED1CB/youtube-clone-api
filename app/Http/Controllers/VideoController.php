@@ -7,6 +7,7 @@ use App\Models\Video;
 use App\Services\Response;
 use Illuminate\Support\Str;
 use App\Services\VideoManager;
+use App\Models\Reaction;
 
 class VideoController extends Controller
 {
@@ -82,6 +83,41 @@ class VideoController extends Controller
         ] , 201 , 'Success');
 
     }
+
+    
+    public function reactVideo($videoId){
+
+        $video = Video::findOrFail($videoId);
+
+        $auth = request()->user->id;
+
+
+        $reaction = Reaction::where('user_id' , $auth)->where('reactable_id' , $videoId)->first();
+
+        $isReacted = false; 
+        if ($reaction){
+
+            $reaction->delete();
+            $isReacted = false; 
+            
+        }else{
+ 
+
+            $video->reactions()->save(
+                new Reaction([
+                'user_id' => $auth
+            ])
+        );
+            $isReacted = true;
+        }
+
+
+        return Response::push(['is_reacted' => $isReacted , 'count_reacts' => $video->reactions()->count()   ] , 200,($isReacted ? 'React Created Success' : 'React Removed Sucess'));
+
+
+    }
+
+
 }
 
 

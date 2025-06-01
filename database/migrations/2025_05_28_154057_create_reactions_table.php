@@ -14,14 +14,11 @@ return new class extends Migration
         Schema::create('reactions', function (Blueprint $table) {
             $table->id();
                         
-            $table->morphs('reacable');
+            $table->morphs('reactable');
 
             $table->foreignId('user_id')->constrained('users');
 
-            $table->unique(['reacable_id', 'reacable_type' , 'user_id']);
-
-            $table->enum('type', ['like', 'dislike']);
-
+            $table->unique(['reactable_id', 'reactable_type' , 'user_id']);
 
             $table->timestamps();
         });

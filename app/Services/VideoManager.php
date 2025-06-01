@@ -3,7 +3,6 @@
 namespace App\Services;
 use FFMpeg;
 
-
 class VideoManager{
 
     public static function generateThumbnail($path , $slug)
@@ -40,6 +39,7 @@ class VideoManager{
         return $duration;
 
     }
+
 
 
 }

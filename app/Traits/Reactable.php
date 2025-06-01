@@ -6,7 +6,7 @@ trait Reactable
 {
       public function reactions()
       {
-            return $this->morphMany(App\Models\Reaction::class, 'reactable');
+            return $this->morphMany(\App\Models\Reaction::class, 'reactable');
       }
 
       public function likes()
@@ -14,8 +14,7 @@ trait Reactable
          return $this->reactions()->where('type', 'like');
       }
 
-      public function dislikes()
-      {
-         return $this->reactions()->where('type', 'dislike');
-      }
+      
+
+      
 }

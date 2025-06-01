@@ -34,6 +34,7 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
     Route::middleware('auth.youtube')->group(function (){
             
         Route::post('/upload' , 'uplodVideo');
+        Route::post('/{video}/react' , 'reactVideo');
 
 
     });
