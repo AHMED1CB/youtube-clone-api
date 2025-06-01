@@ -11,9 +11,11 @@ class Comment extends Model
 
     public function commentor()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class , 'commentor');
     }
 
     
+    protected $guarded = [];
+
 
 }

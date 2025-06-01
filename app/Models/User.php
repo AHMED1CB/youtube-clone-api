@@ -44,4 +44,9 @@ class User extends Authenticatable
         return $this->hasMany(Subscribe::class , 'channel');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 }

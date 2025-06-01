@@ -8,6 +8,7 @@ use App\Services\Response;
 use Illuminate\Support\Str;
 use App\Services\VideoManager;
 use App\Models\Reaction;
+use App\Models\Comment;
 
 class VideoController extends Controller
 {
@@ -138,6 +139,49 @@ class VideoController extends Controller
             ] , 404 , 'Video Not Found');
         }
 
+
+
+    }
+
+
+    public function commentOnVideo($videoId){
+
+        $check = Validator::make(request()->only('comment') , [
+            'comment' => ['required']
+        ]);
+
+        
+        if ($check->fails()){
+            
+            return Response::push([
+                'errors' => $check->errors()
+            ] , 400 , 'Invalid Comment');
+
+        }
+        
+        $video = Video::find($videoId);
+
+
+        if($video){
+            $comment =   new Comment([
+                'comment' => request()->comment,
+                'commentor' => request()->user->id 
+            ]);
+            $video->comments()->save(
+              $comment
+            );
+
+
+            return Response::push([
+                'comment' => $comment
+                ] , 201 , 'Comment Created');
+
+
+        }else{
+            return Response::push([
+                
+            ] , 404 , 'Video Not Found');
+        }
 
 
     }
