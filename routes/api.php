@@ -2,10 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VideoController;
+
 Route::controller(AuthController::class)->group(function (){
 
     
-    Route::prefix('/auth')->group(function () {
+Route::prefix('/auth')->group(function () {
 
             Route::middleware('auth.youtube')->group(function (){
                     
@@ -25,4 +27,19 @@ Route::controller(AuthController::class)->group(function (){
 
 
 });
+
+    
+Route::prefix('/videos')->controller(VideoController::class)->group(function () {
+
+    Route::middleware('auth.youtube')->group(function (){
+            
+        Route::post('/upload' , 'uplodVideo');
+
+
+    });
+
+
+});
+
+
 
