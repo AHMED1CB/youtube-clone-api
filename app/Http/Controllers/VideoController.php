@@ -118,6 +118,30 @@ class VideoController extends Controller
     }
 
 
+    public function getVideo($slug){
+        
+        $video = Video::where('slug' , $slug)->first();
+
+        if ($video){
+            return Response::push([
+                'video' => $video->with([
+                    'reactions',
+                    'views',
+                    'channel',
+                    'comments'
+                ])->where('slug' , $slug)->first()
+            ] , 200 , 'Success');
+
+        }else{
+            return Response::push([
+                
+            ] , 404 , 'Video Not Found');
+        }
+
+
+
+    }
+
 }
 
 

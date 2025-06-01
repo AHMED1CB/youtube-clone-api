@@ -8,6 +8,6 @@ trait Viewable
 
     public function views()
     {
-        return $this->morphMany(App\Models\View::class, 'viewable');
+        return $this->morphMany(\App\Models\View::class, 'viewable');
     }
 }
