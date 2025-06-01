@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\ChannelsController;
 
 Route::controller(AuthController::class)->group(function (){
 
@@ -48,4 +49,19 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
 });
 
 
+
+
+Route::prefix('/channels')->controller(ChannelsController::class)->group(function () {
+
+    Route::middleware('auth.youtube')->group(function (){
+            
+        Route::post('/{channel}/subscribe' , 'subscribeChannel');
+        
+
+
+    });
+
+
+
+});
 
