@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Validator;
-use App\Models\Video;
-use App\Services\Response;
 use Illuminate\Support\Str;
-use App\Services\VideoManager;
 use App\Models\Reaction;
+use App\Models\Video;
+use App\Models\History;
+use App\Services\Response;
+use App\Services\VideoManager;
 use App\Models\Comment;
+use App\Models\View;
 
 class VideoController extends Controller
 {
@@ -124,6 +126,7 @@ class VideoController extends Controller
         $video = Video::where('slug' , $slug)->first();
 
         if ($video){
+
             return Response::push([
                 'video' => $video->with([
                     'reactions',
@@ -133,12 +136,48 @@ class VideoController extends Controller
                 ])->where('slug' , $slug)->first()
             ] , 200 , 'Success');
 
+            
+
         }else{
             return Response::push([
                 
             ] , 404 , 'Video Not Found');
         }
 
+
+
+    }
+
+    public function savedata($slug){
+
+            // Adding To History and add view if user  Is Auth
+
+            $video = Video::where('slug' , $slug)->first();
+
+            if($video){
+
+                $isSaved = History::where('user' , request()->user->id)->where('video' , $video->id)->exists();
+                
+                if (!$isSaved){
+                    $historyRecord = new History([
+                        'user' => request()->user->id,
+                        'video' => $video->id
+                    ]);
+                    
+                    request()->user->history()->save($historyRecord);
+                }
+
+                $videoView = new View([
+                    'viewer' => request()->user->id,
+                ]); 
+                $video->views()->save($videoView);
+
+                return Response::push([] , 200, 'Video Details Added Success');
+
+            }else{
+
+                return Response::push([] , 404, 'Video Not found');
+            }
 
 
     }

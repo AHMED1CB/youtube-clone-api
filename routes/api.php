@@ -39,6 +39,7 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
         Route::post('/{video}/react' , 'reactVideo');
         Route::post('/{video}/comment' , 'commentOnVideo');
 
+        Route::post('/{slug}/savedata' , 'savedata');
 
     });
 
