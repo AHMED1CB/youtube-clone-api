@@ -225,6 +225,30 @@ class VideoController extends Controller
 
     }
 
+
+    public function getVideos(){
+        $videos = [];
+        if (request()->has('count')){
+            $videos = Video::with([
+                'reactions',
+                'views',
+                'channel',
+                'comments'
+            ])->paginate(request()->count)->items();
+        }else{
+            $videos = Video::with([
+                'reactions',
+                'views',
+                'channel',
+                'comments'
+            ])->take(50)->get();
+        }
+
+        return Response::push([
+            'videos' => $videos,
+        ] , 200 , 'Success');
+    }
+
 }
 
 

@@ -43,7 +43,9 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
 
     });
 
+
     Route::post('/{slug}' , 'getVideo');
+    Route::post('/' , 'getVideos');
 
 
 
