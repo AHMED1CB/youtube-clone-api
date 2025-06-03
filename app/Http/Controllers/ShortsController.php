@@ -2,20 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use App\Models\Reaction;
-use App\Models\Video;
-use App\Models\History;
+use Illuminate\Http\Request;
+
 use App\Services\Response;
 use App\Services\VideoManager;
+
+use App\Models\Short;
 use App\Models\Comment;
+use App\Models\Reaction;
 use App\Models\View;
+use App\Models\History;
 
-class VideoController extends Controller
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+
+
+class ShortsController extends Controller
 {
-    public function uplodVideo(){
+    
 
+    public function uplodShortVideo(){
+
+            
         $check = Validator::make(request()->all() , [
             'title' => ['required' , 'min:3' , 'max:255'],
             'descreption' => ['required' , 'min:3'],
@@ -33,16 +41,23 @@ class VideoController extends Controller
             return Response::push([
                 'errors' => $check->errors(),
                 
-            ] , 400 , 'Invalid Video Details');
+            ] , 400 , 'Invalid Short Video Details');
         }
+        
         $rand = Str::random(22);
+        
         $file = request()->file('video');
-        $fName = 'ytv-' . Str::replace( ['/' , '\\'] , '' , $rand) . '.' . $file->getClientOriginalExtension();
 
-        $path = $file->storeAs('videos' , $fName);
-    
+        $fName = 'yts-' . Str::replace( ['/' , '\\'] , '' , $rand) . '.' . $file->getClientOriginalExtension();
 
-        $videoModel = new Video(); 
+        
+        $path = $file->storeAs('videos' , $fName); // Shorts Will be in Videos Disk Too
+        
+        if (VideoManager::durationInSeconds($fName) > 2){
+            return Response::push([] , 400 , 'Video is Too Long');
+        }
+
+        $videoModel = new Short(); 
 
         $videoModel->title = request()->title;
         $videoModel->descreption = request()->descreption;
@@ -82,22 +97,23 @@ class VideoController extends Controller
 
         return Response::push([
             'video' => $videoModel,
-            
-        ] , 201 , 'Success');
+        ] , 200 , 'Uploaded Success');
 
     }
 
-    
-    public function reactVideo($videoId){
 
-        $video = Video::findOrFail($videoId);
+    public function reactOnShortVideo($shortId){
+
+        
+        $short = Short::findOrFail($shortId);
 
         $auth = request()->user->id;
 
 
-        $reaction = $video->reactions()->where('user_id' , $auth)->where('reactable_id' , $shortId)->first();
-
+        
+        $reaction = $short->reactions()->where('user_id' , $auth)->where('reactable_id' , $shortId)->first();
         $isReacted = false; 
+
         if ($reaction){
 
             $reaction->delete();
@@ -105,7 +121,7 @@ class VideoController extends Controller
         }else{
  
 
-            $video->reactions()->save(
+            $short->reactions()->save(
                 new Reaction([
                 'user_id' => $auth
             ])
@@ -114,76 +130,15 @@ class VideoController extends Controller
         }
 
 
-        return Response::push(['is_reacted' => $isReacted , 'count_reacts' => $video->reactions()->count()   ] , 200,($isReacted ? 'React Created Success' : 'React Removed Sucess'));
+        return Response::push(['is_reacted' => $isReacted  ,  'count_reacts' => $short->reactions()->count()   ] , 200,($isReacted ? 'React Created Success' : 'React Removed Sucess'));
 
 
     }
 
 
-    public function getVideo($slug){
+    public function commentOnShortVideo($shortId){
+
         
-        $video = Video::where('slug' , $slug)->first();
-
-        if ($video){
-
-            return Response::push([
-                'video' => $video->with([
-                    'reactions',
-                    'views',
-                    'channel',
-                    'comments'
-                ])->where('slug' , $slug)->first()
-            ] , 200 , 'Success');
-
-            
-
-        }else{
-            return Response::push([
-                
-            ] , 404 , 'Video Not Found');
-        }
-
-
-
-    }
-
-    public function savedata($slug){
-
-            // Adding To History and add view if user  Is Auth
-
-            $video = Video::where('slug' , $slug)->first();
-
-            if($video){
-
-                $isSaved = History::where('user' , request()->user->id)->where('video' , $video->id)->exists();
-                
-                if (!$isSaved){
-                    $historyRecord = new History([
-                        'user' => request()->user->id,
-                        'video' => $video->id
-                    ]);
-                    
-                    request()->user->history()->save($historyRecord);
-                }
-
-                $videoView = new View([
-                    'viewer' => request()->user->id,
-                ]); 
-                $video->views()->save($videoView);
-
-                return Response::push([] , 200, 'Video Details Added Success');
-
-            }else{
-
-                return Response::push([] , 404, 'Video Not found');
-            }
-
-
-    }
-
-
-    public function commentOnVideo($videoId){
-
         $check = Validator::make(request()->only('comment') , [
             'comment' => ['required' ]
         ]);
@@ -197,15 +152,15 @@ class VideoController extends Controller
 
         }
         
-        $video = Video::find($videoId);
+        $short = Short::find($shortId);
 
 
-        if($video){
+        if($short){
             $comment =   new Comment([
                 'comment' => request()->comment,
                 'commentor' => request()->user->id 
             ]);
-            $video->comments()->save(
+            $short->comments()->save(
               $comment
             );
 
@@ -224,19 +179,72 @@ class VideoController extends Controller
 
     }
 
+    public function saveShortdata($slug){
+            
+        // Adding View To Video
 
-    public function getVideos(){
-        $videos = [];
+            $short = Short::where('slug' , $slug)->first();
+
+            if($short){
+                
+                $shortView = new View([
+                    'viewer' => request()->user->id,
+                ]); 
+                $short->views()->save($shortView);
+
+                return Response::push([] , 200, 'Video Details Added Success');
+
+            }else{
+
+                return Response::push([] , 404, 'Video Not found');
+            }
+
+
+
+    }
+
+    public function getShortVideo($slug){
+
+        
+        $short = Short::where('slug' , $slug)->first();
+
+        if ($short){
+
+            return Response::push([
+                'video' => $short->with([
+                    'reactions',
+                    'views',
+                    'channel',
+                    'comments'
+                ])->where('slug' , $slug)->first()
+            ] , 200 , 'Success');
+
+            
+
+        }else{
+            return Response::push([
+                
+            ] , 404 , 'Video Not Found');
+        }
+
+
+
+
+    }
+
+    public function getShortVideos(){
+
+        $shorts = [];
         
         if (request()->has('count')){
-            $videos = Video::with([
+            $shorts = Short::with([
                 'reactions',
                 'views',
                 'channel',
                 'comments'
             ])->paginate(request()->count)->items();
         }else{
-            $videos = Video::with([
+            $shorts = Short::with([
                 'reactions',
                 'views',
                 'channel',
@@ -245,10 +253,10 @@ class VideoController extends Controller
         }
 
         return Response::push([
-            'videos' => $videos,
+            'videos' => $shorts,
         ] , 200 , 'Success');
+    
+
     }
 
 }
-
-

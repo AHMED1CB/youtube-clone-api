@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\ShortsController;
 use App\Http\Controllers\ChannelsController;
 
 
@@ -69,4 +70,31 @@ Route::prefix('/channels')->controller(ChannelsController::class)->group(functio
 
 
 });
+
+
+
+
+Route::prefix('/shorts')->controller(ShortsController::class)->group(function () {
+
+    Route::middleware('auth.youtube')->group(function (){
+            
+        Route::post('/upload' , 'uplodShortVideo');
+        
+        Route::post('/{short}/react' , 'reactOnShortVideo');
+
+        Route::post('/{short}/comment' , 'commentOnShortVideo');
+
+        Route::post('/{slug}/savedata' , 'saveShortdata');
+
+    });
+
+
+    Route::post('/{slug}' , 'getShortVideo');
+    
+    Route::post('/' , 'getShortVideos');
+
+
+
+});
+
 

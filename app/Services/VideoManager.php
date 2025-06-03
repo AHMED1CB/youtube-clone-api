@@ -32,11 +32,20 @@ class VideoManager{
             $seconds = ($duration % 60);
             $duration = "$minutes:$seconds";
         }else{
-            $duration = $duration . "s";
+            $duration = $duration;
         }
 
 
         return $duration;
+
+    }
+
+    public static function durationInSeconds($path){
+
+        $duration = FFMpeg::fromDisk('videos')->open($path)->getDurationInSeconds();
+
+        return ($duration / 60);
+
 
     }
 
