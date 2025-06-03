@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ChannelsController;
 
+
+
 Route::controller(AuthController::class)->group(function (){
 
     
@@ -60,9 +62,9 @@ Route::prefix('/channels')->controller(ChannelsController::class)->group(functio
             
         Route::post('/{channel}/subscribe' , 'subscribeChannel');
         
-
-
     });
+
+    Route::post('/{username}' , 'getChannelData');
 
 
 

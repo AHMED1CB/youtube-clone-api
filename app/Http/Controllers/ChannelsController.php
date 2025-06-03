@@ -47,4 +47,30 @@ class ChannelsController extends Controller
         }
 
     }
+
+
+    public function getChannelData($username){
+
+        $channel = User::where('username' , $username)->first();
+
+        if ($channel){
+    
+            $data = User::where('username' , $username)->with([ 
+                'subscribers' , 
+                'videos' => ['views' , 'comments' , 'reactions'],
+                'shorts' => ['views' , 'comments' , 'reactions']
+              
+                ])->first();
+            return Response::push([
+                'channel' => $data
+            ] , 200 , 'Success');
+
+        }
+        
+        return Response::push([
+                
+        ] , 404 , 'Channel Not Found');
+
+    }
 }
+ 
