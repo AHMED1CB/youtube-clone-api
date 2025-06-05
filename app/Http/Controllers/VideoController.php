@@ -153,7 +153,7 @@ class VideoController extends Controller
 
             $video = Video::where('slug' , $slug)->first();
 
-            if($video){
+            if($video && request()->user->historyState){ // check if recording is Active
 
                 $isSaved = History::where('user' , request()->user->id)->where('video' , $video->id)->exists();
                 
