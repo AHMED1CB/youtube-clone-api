@@ -42,7 +42,10 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
         Route::post('/upload' , 'uplodVideo');
         
         Route::post('/{video}/react' , 'reactVideo');
+
         Route::post('/{video}/comment' , 'commentOnVideo');
+
+        Route::post('/{video}/delete' , 'deleteVideo');
 
         Route::post('/{slug}/savedata' , 'savedata');
 
@@ -82,6 +85,9 @@ Route::prefix('/shorts')->controller(ShortsController::class)->group(function ()
             
         Route::post('/upload' , 'uplodShortVideo');
         
+
+        Route::post('/{short}/delete' , 'deleteShort');
+
         Route::post('/{short}/react' , 'reactOnShortVideo');
 
         Route::post('/{short}/comment' , 'commentOnShortVideo');

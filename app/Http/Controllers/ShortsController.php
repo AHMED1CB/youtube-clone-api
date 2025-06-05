@@ -259,4 +259,21 @@ class ShortsController extends Controller
 
     }
 
+
+    
+    public function deleteShort($shortId){
+
+        $short = request()->user->shorts()->whereId($shortId)->first();
+
+        if ($short){
+
+            $short->delete();
+
+            return Response::push([] , 200 , 'short Deleted Success');
+        }
+
+        return Response::push([] , 404 , 'short Not Found');
+
+    }
+
 }

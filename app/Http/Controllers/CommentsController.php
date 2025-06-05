@@ -19,7 +19,7 @@ class CommentsController extends Controller
 
     public function deleteComment($commentId){
 
-        $comment = Comment::whereId($commentId)->first();
+        $comment = request()->user->comments()->whereId($commentId)->first();
 
         if ($comment){
 
@@ -49,7 +49,7 @@ class CommentsController extends Controller
             ]);
         }
 
-        $comment = Comment::whereId($commentId)->first();
+        $comment = request()->user->comments()->whereId($commentId)->first();
 
         if ($comment){
 

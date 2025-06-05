@@ -20,6 +20,22 @@ class Short extends Model
         return $this->belongsTo(User::class , 'channel');
     }
     
+    public function deleteShort($videoId){
+
+        $video = request()->user->videos()->whereId($videoId)->first();
+
+        if ($video){
+
+            $video->delete();
+
+            return Response::push([] , 200 , 'Video Deleted Success');
+        }
+
+        return Response::push([] , 404 , 'Video Not Found');
+
+
+    }
+    
   
 
 
