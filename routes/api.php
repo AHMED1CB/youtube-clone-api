@@ -6,6 +6,7 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ShortsController;
 use App\Http\Controllers\ChannelsController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\CommentsController;
 
 
 
@@ -109,6 +110,27 @@ Route::prefix('/history')->controller(HistoryController::class)->group(function 
         Route::post('/changestate' , 'changestate');
         
         Route::post('/clear' , 'clearHistory');
+
+
+
+    });
+
+
+
+});
+
+
+
+
+Route::prefix('/comments')->controller(CommentsController::class)->group(function () {
+
+    Route::middleware('auth.youtube')->group(function (){
+            
+        Route::post('/' , 'getAllUserComments');
+        
+        Route::post('/{comment}/delete' , 'deleteComment');
+        
+        Route::post('/{comment}/update' , 'updateComment');
 
 
 
