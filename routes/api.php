@@ -1,18 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\VideoController;
-use App\Http\Controllers\ShortsController;
-use App\Http\Controllers\ChannelsController;
-use App\Http\Controllers\HistoryController;
-use App\Http\Controllers\CommentsController;
-
+use Illuminate\Support\Facades\Route,
+ App\Http\Controllers\AuthController,
+ App\Http\Controllers\VideoController,
+ App\Http\Controllers\ShortsController,
+ App\Http\Controllers\ChannelsController,
+ App\Http\Controllers\HistoryController,
+ App\Http\Controllers\CommentsController;
 
 
 Route::controller(AuthController::class)->group(function (){
 
-    
+
 Route::prefix('/auth')->group(function () {
 
             Route::middleware('auth.youtube')->group(function (){
@@ -84,7 +83,6 @@ Route::prefix('/shorts')->controller(ShortsController::class)->group(function ()
     Route::middleware('auth.youtube')->group(function (){
             
         Route::post('/upload' , 'uplodShortVideo');
-        
 
         Route::post('/{short}/delete' , 'deleteShort');
 
@@ -100,7 +98,6 @@ Route::prefix('/shorts')->controller(ShortsController::class)->group(function ()
     Route::post('/{slug}' , 'getShortVideo');
     
     Route::post('/' , 'getShortVideos');
-
 
 });
 
@@ -137,8 +134,6 @@ Route::prefix('/comments')->controller(CommentsController::class)->group(functio
         Route::post('/{comment}/delete' , 'deleteComment');
         
         Route::post('/{comment}/update' , 'updateComment');
-
-
 
     });
 
