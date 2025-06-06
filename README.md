@@ -117,15 +117,15 @@ A RESTful API backend for a YouTube-like video-sharing platform, built with Lara
 - `POST /api/channels/{username}` - get Channel Data
 
 ### 💬 Comments:
-- `GET /api/comments/` - get All user Comments
+- `POST /api/comments/` - get All user Comments
 - `POST /api/comments/{comment}/update` - Update Comment
-- `DELETE /api/comments/{comment}/delete` - Delete a comment
+- `POST /api/comments/{comment}/delete` - Delete a comment
 ---
 
 ### 💬 History:
-- `GET /api/` - get All History Videos Of User
+- `POST /api/` - get All History Videos Of User
 - `POST /api/history/changestate` - Pause or Start Saving History Videos
-- `DELETE /api/history/clear` - Clear History of user
+- `POST /api/history/clear` - Clear History of user
 ---
 
 ## 🗄️ Database Configuration
