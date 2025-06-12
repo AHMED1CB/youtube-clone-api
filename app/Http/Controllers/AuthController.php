@@ -5,14 +5,20 @@ namespace App\Http\Controllers;
 use App\Services\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\History;
 
 class AuthController extends Controller
 {
     
     public function getUserDetails(){
+        $user = User::whereId(request()->user->id)->
+                withCount('subscribers' , 'videos' , 'shorts' , 'comments')
+                ->with(   'subscribers' , 'videos' , 'shorts' ,'comments')
+            ->first();
+
 
         return Response::push([
-            'user' => request()->user
+            'user' => $user 
         ] , 200 , 'Success');
 
     }
