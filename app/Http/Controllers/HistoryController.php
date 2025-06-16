@@ -7,14 +7,6 @@ use App\Services\Response;
 
 class HistoryController extends Controller
 {
-    public function getHistoryVideos(){
-
-        return Response::push([
-            'history' => request()->user->history()
-        ] ,  200 , 'Success');
-
-    }
-
 
     public function changestate(){
 
@@ -25,7 +17,7 @@ class HistoryController extends Controller
         
         request()->user->save();
 
-        return Response::push(['currentState' => !$currentState] , 200 , 'State Changed Success');
+        return Response::push(['currentState' => request()->user->historyState] , 200 , 'State Changed Success');
     }
 
 

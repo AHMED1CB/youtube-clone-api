@@ -13,9 +13,14 @@ class History extends Model
 
     public $guarded = [];
 
-    public function videos(){
-        return $this->hasMany(Video::class , 'video');
+    public function video(){
+        return $this->belongsTo(Video::class , 'video');
     }
+
+    public function user(){
+        return $this->belongsTo(User::class , 'user');
+    }
+
 
 }
 

@@ -107,8 +107,6 @@ Route::prefix('/shorts')->controller(ShortsController::class)->group(function ()
 Route::prefix('/history')->controller(HistoryController::class)->group(function () {
 
     Route::middleware('auth.youtube')->group(function (){
-            
-        Route::post('/' , 'getHistoryVideos');
         
         Route::post('/changestate' , 'changestate');
         

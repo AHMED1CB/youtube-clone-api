@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function getUserDetails(){
         $user = User::whereId(request()->user->id)->
                 withCount('subscribers' , 'subscriptions' , 'videos' , 'shorts' , 'comments')
-                ->with(   'subscribers' , 'subscriptions' , 'videos' , 'shorts' ,'comments')
+                ->with(   'subscribers' , 'subscriptions' , 'videos' , 'shorts' ,'comments' , 'history.video')
             ->first();
 
 
