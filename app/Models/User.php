@@ -52,12 +52,13 @@ class User extends Authenticatable
 
 
 
-    public function subscribes(){
+    public function subscriptions(){
 
         return $this->hasMany(Subscribe::class , 'subscriber');
         
     }
 
+    
 
     public function history(){
         return $this->hasMany(History::class , 'user');
