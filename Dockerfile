@@ -21,4 +21,8 @@ ENV LOG_CHANNEL stderr
 # Allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
+
+COPY --from=builder /usr/bin/ffmpeg /usr/bin/ffmpeg
+COPY --from=builder /usr/bin/ffprobe /usr/bin/ffprobe
+
 CMD ["/start.sh"]
