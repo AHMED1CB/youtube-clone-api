@@ -16,13 +16,18 @@ class Video extends Model
     use Commentable;
 
     protected $fillable = ['title' , 'descreption' , 'cover' , 'video' , 'duration' , 'slug' , 'channel'];
-
+    protected $appends = ['creation_date'];
 
     public function channel()
     {
         return $this->belongsTo(User::class , 'channel');
         
     }
+
+    public function getCreationDateAttribute(){
+        return $this->created_at->diffForHumans();
+    }
+
 
  
     

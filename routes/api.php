@@ -139,5 +139,3 @@ Route::prefix('/comments')->controller(CommentsController::class)->group(functio
 
 });
 
-
-

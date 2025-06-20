@@ -32,7 +32,7 @@ class VideoManager{
             $seconds = ($duration % 60);
             $duration = "$minutes:$seconds";
         }else{
-            $duration = $duration;
+            $duration = "0:$duration";
         }
 
 
