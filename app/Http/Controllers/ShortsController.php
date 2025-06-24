@@ -248,8 +248,8 @@ class ShortsController extends Controller
                 'reactions',
                 'views',
                 'channel',
-                'comments'
-            ])->take(50)->get();
+                'comments',
+            ])->withCount('views' , 'reactions' , 'comments')->take(50)->get();
         }
 
         return Response::push([

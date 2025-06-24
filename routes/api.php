@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Route,
  App\Http\Controllers\ShortsController,
  App\Http\Controllers\ChannelsController,
  App\Http\Controllers\HistoryController,
- App\Http\Controllers\CommentsController;
+ App\Http\Controllers\CommentsController,
+Illuminate\Support\Facades\Storage;
+
 
 
 Route::controller(AuthController::class)->group(function (){
@@ -138,4 +140,3 @@ Route::prefix('/comments')->controller(CommentsController::class)->group(functio
 
 
 });
-

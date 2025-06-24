@@ -37,9 +37,9 @@ class VideoController extends Controller
         }
         $rand = Str::random(22);
         $file = request()->file('video');
-        $fName = 'ytv-' . Str::replace( ['/' , '\\'] , '' , $rand) . '.' . $file->getClientOriginalExtension();
+        $fName = 'videos/ytv-' . Str::replace( ['/' , '\\'] , '' , $rand) . '.' . $file->getClientOriginalExtension();
 
-        $path = $file->storeAs('videos' , $fName);
+        $path = $file->storeAs('public' , $fName); 
     
 
         $videoModel = new Video(); 
