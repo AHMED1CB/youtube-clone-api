@@ -39,7 +39,7 @@ class VideoController extends Controller
         $file = request()->file('video');
         $fName = 'videos/ytv-' . Str::replace( ['/' , '\\'] , '' , $rand) . '.' . $file->getClientOriginalExtension();
 
-        $path = $file->storeAs('public' , $fName); 
+        $path = $file->storeAs('videos' , $fName); 
     
 
         $videoModel = new Video(); 

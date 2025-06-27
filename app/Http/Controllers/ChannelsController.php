@@ -38,7 +38,7 @@ class ChannelsController extends Controller
 
             return Response::push([
                 'is_subscribed' => $isSubscribed    
-            ] , 200 , ($isSubscribed ? 'Subscribed Success' : 'Unsubscribed Success' ));
+            ] , 200 , 'Success');
 
         }else{
             return Response::push([
@@ -51,16 +51,16 @@ class ChannelsController extends Controller
 
     public function getChannelData($username){
 
-        $channel = User::where('username' , $username)->first();
+        $isExistsChannel = User::where('username' , $username)->exists();
 
-        if ($channel){
+        if ($isExistsChannel){
     
             $data = User::where('username' , $username)->with([ 
                 'subscribers' , 
                 'videos' => ['views' , 'comments' , 'reactions'],
-                'shorts' => ['views' , 'comments' , 'reactions']
+                'shorts' => fn($q) => $q->withCount('views')
               
-                ])->first();
+                ])->withCount('comments' , 'videos' , 'shorts' , 'subscribers')->first();
             return Response::push([
                 'channel' => $data
             ] , 200 , 'Success');

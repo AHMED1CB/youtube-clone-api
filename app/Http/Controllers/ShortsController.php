@@ -119,8 +119,6 @@ class ShortsController extends Controller
             $reaction->delete();
             
         }else{
- 
-
             $short->reactions()->save(
                 new Reaction([
                 'user_id' => $auth
