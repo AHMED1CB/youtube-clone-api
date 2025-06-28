@@ -23,13 +23,13 @@ class ChannelsController extends Controller
                 $subscribe->delete();
                 $isSubscribed = false;
             }else{
-
+                
                 $subscribe = new Subscribe([
                     'channel' => $channelId,
                     'subscriber' => request()->user->id
                 ]);
 
-                request()->user->subscribes()->save($subscribe);
+                request()->user->subscriptions()->save($subscribe);
 
                 $isSubscribed = true;
 
