@@ -69,9 +69,10 @@ Route::prefix('/channels')->controller(ChannelsController::class)->group(functio
             
         Route::post('/{channel}/subscribe' , 'subscribeChannel');
         
+        Route::post('/{username}' , 'getChannelData');
+    
     });
 
-    Route::post('/{username}' , 'getChannelData');
 
 
 

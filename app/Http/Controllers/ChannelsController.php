@@ -55,12 +55,21 @@ class ChannelsController extends Controller
 
         if ($isExistsChannel){
     
+
             $data = User::where('username' , $username)->with([ 
                 'subscribers' , 
                 'videos' => ['views' , 'comments' , 'reactions'],
                 'shorts' => fn($q) => $q->withCount('views')
               
                 ])->withCount('comments' , 'videos' , 'shorts' , 'subscribers')->first();
+            
+
+            $isSubscribed = Subscribe::where('subscriber' , request()->user->id)
+                            ->where('channel' , $data->id)->exists();
+
+
+            $data['is_subscribed'] = $isSubscribed;
+
             return Response::push([
                 'channel' => $data
             ] , 200 , 'Success');
