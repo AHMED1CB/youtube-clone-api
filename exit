@@ -1,0 +1,88 @@
+[33mcommit eafff01b63d7ce06773a772ea99ff54b8202f177[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: ahmed1cb2 <hijy1325@gmail.com>
+Date:   Mon Jul 7 11:31:28 2025 +0300
+
+    Fix Errors And Add Video Details When Getting Video
+
+[1mdiff --git a/app/Http/Controllers/VideoController.php b/app/Http/Controllers/VideoController.php[m
+[1mindex cf1fa7b..60764e4 100644[m
+[1m--- a/app/Http/Controllers/VideoController.php[m
+[1m+++ b/app/Http/Controllers/VideoController.php[m
+[36m@@ -122,18 +122,26 @@[m [mpublic function reactVideo($videoId){[m
+ [m
+     public function getVideo($slug){[m
+         [m
+[31m-        $video = Video::where('slug' , $slug)->first();[m
+[32m+[m[32m        $video = Video::where('slug' , $slug)->exists();[m
+ [m
+         if ($video){[m
+ [m
+[31m-            return Response::push([[m
+[31m-                'video' => $video->with([[m
+[31m-                    'reactions',[m
+[31m-                    'views',[m
+[31m-                    'channel',[m
+[31m-                    'comments'[m
+[31m-                ])->where('slug' , $slug)->first()[m
+[31m-            ] , 200 , 'Success');[m
+[32m+[m[32m            $data = Video::where('slug' , $slug)->with([[m
+[32m+[m[32m                'channel',[m
+[32m+[m[32m                'reactions',[m
+[32m+[m[32m                'comments'[m
+[32m+[m[32m            ])->withCount('views' , 'reactions',  'comments')->first();[m
+[32m+[m
+[32m+[m
+[32m+[m[32m            $moreVideos = Video::where('slug' , '!=' , $slug)->with('channel' , 'comments')->withCount('views' , 'reactions')->take(15)->get();[m
+[32m+[m
+[32m+[m[32m            $data['more_videos'] = $moreVideos;[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m            $this->savedata($slug);[m
+[32m+[m
+[32m+[m[32m            return Response::push(['video' => $data] , 200 , 'Success');[m
+ [m
+             [m
+ [m
+[36m@@ -166,10 +174,14 @@[m [mpublic function savedata($slug){[m
+                     request()->user->history()->save($historyRecord);[m
+                 }[m
+ [m
+[31m-                $videoView = new View([[m
+[31m-                    'viewer' => request()->user->id,[m
+[31m-                ]); [m
+[31m-                $video->views()->save($videoView);[m
+[32m+[m[32m                $isWatched = $video->views()->where('viewer' , request()->user->id)->exists();[m
+[32m+[m[32m                if(!$isWatched){[m
+[32m+[m[32m                    $videoView = new View([[m
+[32m+[m[32m                        'viewer' => request()->user->id,[m
+[32m+[m[32m                    ]);[m[41m [m
+[32m+[m[41m                    [m
+[32m+[m[32m                    $video->views()->save($videoView);[m
+[32m+[m[32m                }[m
+ [m
+                 return Response::push([] , 200, 'Video Details Added Success');[m
+ [m
+[1mdiff --git a/public/videos/ytv-ihctYJ7H6ihNGn9ZT7N9pI.mp4 b/public/videos/ytv-ihctYJ7H6ihNGn9ZT7N9pI.mp4[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d876e40[m
+Binary files /dev/null and b/public/videos/ytv-ihctYJ7H6ihNGn9ZT7N9pI.mp4 differ
+[1mdiff --git a/routes/api.php b/routes/api.php[m
+[1mindex 5482d63..7ae4bff 100644[m
+[1m--- a/routes/api.php[m
+[1m+++ b/routes/api.php[m
+[36m@@ -50,11 +50,12 @@[m
+ [m
+         Route::post('/{slug}/savedata' , 'savedata');[m
+ [m
+[32m+[m[32m        Route::post('/{slug}' , 'getVideo');[m
+[32m+[m
+[32m+[m[32m        Route::post('/' , 'getVideos');[m
+     });[m
+ [m
+ [m
+[31m-    Route::post('/{slug}' , 'getVideo');[m
+[31m-    Route::post('/' , 'getVideos');[m
+ [m
+ [m
+ [m

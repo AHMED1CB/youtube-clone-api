@@ -122,18 +122,26 @@ class VideoController extends Controller
 
     public function getVideo($slug){
         
-        $video = Video::where('slug' , $slug)->first();
+        $video = Video::where('slug' , $slug)->exists();
 
         if ($video){
 
-            return Response::push([
-                'video' => $video->with([
-                    'reactions',
-                    'views',
-                    'channel',
-                    'comments'
-                ])->where('slug' , $slug)->first()
-            ] , 200 , 'Success');
+            $data = Video::where('slug' , $slug)->with([
+                'channel',
+                'reactions',
+                'comments'
+            ])->withCount('views' , 'reactions',  'comments')->first();
+
+
+            $moreVideos = Video::where('slug' , '!=' , $slug)->with('channel' , 'comments')->withCount('views' , 'reactions')->take(15)->get();
+
+            $data['more_videos'] = $moreVideos;
+
+
+
+            $this->savedata($slug);
+
+            return Response::push(['video' => $data] , 200 , 'Success');
 
             
 
@@ -166,10 +174,14 @@ class VideoController extends Controller
                     request()->user->history()->save($historyRecord);
                 }
 
-                $videoView = new View([
-                    'viewer' => request()->user->id,
-                ]); 
-                $video->views()->save($videoView);
+                $isWatched = $video->views()->where('viewer' , request()->user->id)->exists();
+                if(!$isWatched){
+                    $videoView = new View([
+                        'viewer' => request()->user->id,
+                    ]); 
+                    
+                    $video->views()->save($videoView);
+                }
 
                 return Response::push([] , 200, 'Video Details Added Success');
 
