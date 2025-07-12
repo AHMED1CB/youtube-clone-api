@@ -17,7 +17,9 @@ class Video extends Model
 
     protected $fillable = ['title' , 'descreption' , 'cover' , 'video' , 'duration' , 'slug' , 'channel'];
     protected $appends = ['creation_date'];
+    protected $hidden = ['created_at' , 'updated_at'];
 
+    
     public function channel()
     {
         return $this->belongsTo(User::class , 'channel');
@@ -27,6 +29,7 @@ class Video extends Model
     public function getCreationDateAttribute(){
         return $this->created_at->diffForHumans();
     }
+
 
 
  

@@ -10,6 +10,8 @@ use App\Models\History;
 use App\Services\Response;
 use App\Services\VideoManager;
 use App\Models\Comment;
+use App\Models\Subscribe;
+use App\Models\User;
 use App\Models\View;
 
 class VideoController extends Controller
@@ -32,7 +34,7 @@ class VideoController extends Controller
         if ($check->fails()){
             return Response::push([
                 'errors' => $check->errors(),
-                
+
             ] , 400 , 'Invalid Video Details');
         }
         $rand = Str::random(22);
@@ -92,10 +94,10 @@ class VideoController extends Controller
 
         $video = Video::findOrFail($videoId);
 
-        $auth = request()->user->id;
+        $userId = request()->user->id;
 
 
-        $reaction = $video->reactions()->where('user_id' , $auth)->where('reactable_id' , $shortId)->first();
+        $reaction = $video->reactions()->where('user_id' , $userId)->where('reactable_id' , $shortId)->first();
 
         $isReacted = false; 
         if ($reaction){
@@ -107,7 +109,7 @@ class VideoController extends Controller
 
             $video->reactions()->save(
                 new Reaction([
-                'user_id' => $auth
+                'user_id' => $userId
             ])
         );
             $isReacted = true;
@@ -122,34 +124,39 @@ class VideoController extends Controller
 
     public function getVideo($slug){
         
-        $video = Video::where('slug' , $slug)->exists();
+        $video = Video::with('comments' , 'channel')
+                        ->withCount('views' , 'comments' , 'reactions')
+                        ->where('slug' , $slug)
+                        ->first();
 
-        if ($video){
+        if(!$video){
+            return Response::push([] , 404 , 'Video Not Found');
+        }
 
-            $data = Video::where('slug' , $slug)->with([
-                'channel',
-                'reactions',
-                'comments'
-            ])->withCount('views' , 'reactions',  'comments')->first();
-
-
-            $moreVideos = Video::where('slug' , '!=' , $slug)->with('channel' , 'comments')->withCount('views' , 'reactions')->take(15)->get();
-
-            $data['more_videos'] = $moreVideos;
+          
+        // Realated Vides
+        $moreVideos  = Video::where('slug' , '!=' , $slug)
+                          ->with('channel' , 'comments')
+                          ->withCount('views' , 'reactions' , 'comments')
+                          ->take(15)->get();
 
 
+        $isSubscribed = Subscribe::where('channel' , $video->channel)
+                                    ->where('subscriber' , request()->user->id)
+                                    ->exists();
 
-            $this->savedata($slug);
+        $channel = $video->getRelation('channel');
+        $channel->is_subscribed = $isSubscribed;
+        $video->setRelation('channel' , $channel); 
 
-            return Response::push(['video' => $data] , 200 , 'Success');
+        $video['more_videos'] = $moreVideos; 
+
+        $this->savedata($slug);
+
+        return Response::push(['video' => $video ] , 200 , 'Success');
 
             
 
-        }else{
-            return Response::push([
-                
-            ] , 404 , 'Video Not Found');
-        }
 
 
 
@@ -157,7 +164,7 @@ class VideoController extends Controller
 
     public function savedata($slug){
 
-            // Adding To History and add view if user  Is Auth
+            // Adding To History (if History  Is able Recording) and add view
 
             $video = Video::where('slug' , $slug)->first();
 
@@ -185,9 +192,6 @@ class VideoController extends Controller
 
                 return Response::push([] , 200, 'Video Details Added Success');
 
-            }else{
-
-                return Response::push([] , 404, 'Video Not found');
             }
 
 
@@ -239,22 +243,19 @@ class VideoController extends Controller
 
     public function getVideos(){
         $videos = [];
-        
-        if (request()->has('count')){
-            $videos = Video::with([
-                'reactions',
-                'views',
-                'channel',
-                'comments'
-            ])->paginate(request()->count)->items();
-        }else{
-            $videos = Video::with([
-                'reactions',
-                'views',
-                'channel',
-                'comments'
-            ])->take(50)->get();
+        $count = 30;
+
+        if (request()->has('count') && request()->count > 0 ){
+            $count = request()->count;
         }
+        
+        $videos = Video::with([
+                'reactions',
+                'views',
+                'channel',
+                'comments'
+        ])->withCount('views')->take($count)->get();
+        
 
         return Response::push([
             'videos' => $videos,

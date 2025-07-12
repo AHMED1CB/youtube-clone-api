@@ -24,6 +24,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verified_at',
+        'created_at',
+        'updated_at'
     ];
 
     protected $casts = [
@@ -50,15 +53,13 @@ class User extends Authenticatable
     }
 
 
-
-
     public function subscriptions(){
 
         return $this->hasMany(Subscribe::class , 'subscriber');
         
     }
-
     
+
 
     public function history(){
         return $this->hasMany(History::class , 'user');

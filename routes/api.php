@@ -36,9 +36,8 @@ Route::prefix('/auth')->group(function () {
 });
 
     
-Route::prefix('/videos')->controller(VideoController::class)->group(function () {
+Route::prefix('/videos')->middleware('auth.youtube')->controller(VideoController::class)->group(function () {
 
-    Route::middleware('auth.youtube')->group(function (){
             
         Route::post('/upload' , 'uplodVideo');
         
@@ -46,14 +45,11 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
 
         Route::post('/{video}/comment' , 'commentOnVideo');
 
-        Route::post('/{video}/delete' , 'deleteVideo');
+        Route::delete('/{video}/delete' , 'deleteVideo');
 
-        Route::post('/{slug}/savedata' , 'savedata');
+        Route::get('/{slug}' , 'getVideo');
 
-        Route::post('/{slug}' , 'getVideo');
-
-        Route::post('/' , 'getVideos');
-    });
+        Route::get('/' , 'getVideos');
 
 
 
@@ -64,15 +60,13 @@ Route::prefix('/videos')->controller(VideoController::class)->group(function () 
 
 
 
-Route::prefix('/channels')->controller(ChannelsController::class)->group(function () {
+Route::prefix('/channels')->middleware('auth.youtube')->controller(ChannelsController::class)->group(function () {
 
-    Route::middleware('auth.youtube')->group(function (){
             
         Route::post('/{channel}/subscribe' , 'subscribeChannel');
         
-        Route::post('/{username}' , 'getChannelData');
+        Route::get('/{username}' , 'getChannelData');
     
-    });
 
 
 
@@ -82,63 +76,47 @@ Route::prefix('/channels')->controller(ChannelsController::class)->group(functio
 
 
 
-Route::prefix('/shorts')->controller(ShortsController::class)->group(function () {
+Route::prefix('/shorts')->middleware('auth.youtube')->controller(ShortsController::class)->group(function () {
 
-    Route::middleware('auth.youtube')->group(function (){
-            
+ 
         Route::post('/upload' , 'uplodShortVideo');
 
-        Route::post('/{short}/delete' , 'deleteShort');
+        Route::delete('/{short}/delete' , 'deleteShort');
 
         Route::post('/{short}/react' , 'reactOnShortVideo');
 
         Route::post('/{short}/comment' , 'commentOnShortVideo');
 
-        Route::post('/{slug}/savedata' , 'saveShortdata');
 
-    });
+        Route::get('/{slug}' , 'getShortVideo');
+        
+        Route::get('/' , 'getShortVideos');
 
 
-    Route::post('/{slug}' , 'getShortVideo');
-    
-    Route::post('/' , 'getShortVideos');
 
 });
 
 
 
 
-Route::prefix('/history')->controller(HistoryController::class)->group(function () {
-
-    Route::middleware('auth.youtube')->group(function (){
+Route::prefix('/history')->middleware('auth.youtube')->controller(HistoryController::class)->group(function () {
         
         Route::post('/changestate' , 'changestate');
         
         Route::post('/clear' , 'clearHistory');
 
 
-
-    });
-
-
-
 });
 
 
 
 
-Route::prefix('/comments')->controller(CommentsController::class)->group(function () {
+Route::prefix('/comments')->middleware('auth.youtube')->controller(CommentsController::class)->group(function () {
 
-    Route::middleware('auth.youtube')->group(function (){
-            
-        Route::post('/' , 'getAllUserComments');
+        Route::get('/' , 'getAllUserComments');
         
-        Route::post('/{comment}/delete' , 'deleteComment');
+        Route::delete('/{comment}/delete' , 'deleteComment');
         
         Route::post('/{comment}/update' , 'updateComment');
-
-    });
-
-
 
 });

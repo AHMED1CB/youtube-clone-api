@@ -183,19 +183,12 @@ class ShortsController extends Controller
 
             $short = Short::where('slug' , $slug)->first();
 
-            if($short){
-                
-                $shortView = new View([
-                    'viewer' => request()->user->id,
-                ]); 
-                $short->views()->save($shortView);
+            $shortView = new View([
+                'viewer' => request()->user->id,
+            ]); 
+            $short->views()->save($shortView);
 
-                return Response::push([] , 200, 'Video Details Added Success');
 
-            }else{
-
-                return Response::push([] , 404, 'Video Not found');
-            }
 
 
 
@@ -207,6 +200,8 @@ class ShortsController extends Controller
         $short = Short::where('slug' , $slug)->first();
 
         if ($short){
+
+            $this->saveShortdata($slug);
 
             return Response::push([
                 'video' => $short->with([
@@ -233,22 +228,21 @@ class ShortsController extends Controller
     public function getShortVideos(){
 
         $shorts = [];
-        
-        if (request()->has('count')){
-            $shorts = Short::with([
-                'reactions',
-                'views',
-                'channel',
-                'comments'
-            ])->paginate(request()->count)->items();
-        }else{
-            $shorts = Short::with([
+        $count = 50;
+
+        if (request()->has('count') && request()->count > 0 ){
+            $count = request()->count;
+        }
+
+
+        $shorts = Short::with([
                 'reactions',
                 'views',
                 'channel',
                 'comments',
-            ])->withCount('views' , 'reactions' , 'comments')->take(50)->get();
-        }
+        ])->withCount('views' , 'reactions' , 'comments')->take($count)->get();
+        
+
 
         return Response::push([
             'videos' => $shorts,
