@@ -97,7 +97,7 @@ class VideoController extends Controller
         $userId = request()->user->id;
 
 
-        $reaction = $video->reactions()->where('user_id' , $userId)->where('reactable_id' , $shortId)->first();
+        $reaction = $video->reactions()->where('user_id' , $userId)->where('reactable_id' , $videoId)->first();
 
         $isReacted = false; 
         if ($reaction){
@@ -106,7 +106,6 @@ class VideoController extends Controller
             
         }else{
  
-
             $video->reactions()->save(
                 new Reaction([
                 'user_id' => $userId
@@ -141,15 +140,23 @@ class VideoController extends Controller
                           ->take(15)->get();
 
 
-        $isSubscribed = Subscribe::where('channel' , $video->channel)
-                                    ->where('subscriber' , request()->user->id)
-                                    ->exists();
+        $isSubscribed =    $video->getRelation('channel')
+                            ->subscribers()
+                            ->where('subscriber' , request()->user->id)
+                            ->exists();
 
+        $isReacted = $video->reactions()->where('user_id' , request()->user->id)->exists();
+        
         $channel = $video->getRelation('channel');
         $channel->is_subscribed = $isSubscribed;
-        $video->setRelation('channel' , $channel); 
 
-        $video['more_videos'] = $moreVideos; 
+
+
+
+        $video->setRelation('channel' , $channel);
+
+        $video->more_videos = $moreVideos; 
+        $video->is_reacted = $isReacted; 
 
         $this->savedata($slug);
 
