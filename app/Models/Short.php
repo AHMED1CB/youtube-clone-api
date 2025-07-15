@@ -14,27 +14,14 @@ class Short extends Model
 
     protected $fillable = ['title' , 'descreption' , 'cover' , 'video' , 'duration' , 'slug' , 'channel'];
 
+    protected $hidden = ['channel_id'];
 
     public function channel()
     {
-        return $this->belongsTo(User::class , 'channel');
+        return $this->belongsTo(User::class , 'channel_id');
     }
     
-    public function deleteShort($videoId){
-
-        $video = request()->user->videos()->whereId($videoId)->first();
-
-        if ($video){
-
-            $video->delete();
-
-            return Response::push([] , 200 , 'Video Deleted Success');
-        }
-
-        return Response::push([] , 404 , 'Video Not Found');
-
-
-    }
+    
     
   
 

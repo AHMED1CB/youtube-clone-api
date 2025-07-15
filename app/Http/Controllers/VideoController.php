@@ -48,7 +48,7 @@ class VideoController extends Controller
 
         $videoModel->title = request()->title;
         $videoModel->descreption = request()->descreption;
-        $videoModel->channel = request()->user->id;
+        $videoModel->channel_id = request()->user->id;
 
         
         $duration = VideoManager::getDuration($fName);
@@ -100,6 +100,7 @@ class VideoController extends Controller
         $reaction = $video->reactions()->where('user_id' , $userId)->where('reactable_id' , $videoId)->first();
 
         $isReacted = false; 
+
         if ($reaction){
 
             $reaction->delete();
@@ -123,7 +124,11 @@ class VideoController extends Controller
 
     public function getVideo($slug){
         
-        $video = Video::with('comments' , 'channel')
+        $video = Video::
+                    with(['comments' ,
+                         'channel' ,
+                         'channel.subscribers' => fn($q) => $q->where('subscriber' , request()->user->id),
+                        ])
                         ->withCount('views' , 'comments' , 'reactions')
                         ->where('slug' , $slug)
                         ->first();
@@ -140,20 +145,11 @@ class VideoController extends Controller
                           ->take(15)->get();
 
 
-        $isSubscribed =    $video->getRelation('channel')
-                            ->subscribers()
-                            ->where('subscriber' , request()->user->id)
-                            ->exists();
+        $isSubscribed =    $video->channel->subscribers->isNotEmpty();
 
         $isReacted = $video->reactions()->where('user_id' , request()->user->id)->exists();
         
-        $channel = $video->getRelation('channel');
-        $channel->is_subscribed = $isSubscribed;
-
-
-
-
-        $video->setRelation('channel' , $channel);
+        $video->channel->is_subscribed = $isSubscribed;
 
         $video->more_videos = $moreVideos; 
         $video->is_reacted = $isReacted; 

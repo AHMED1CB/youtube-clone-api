@@ -61,7 +61,7 @@ class ShortsController extends Controller
 
         $videoModel->title = request()->title;
         $videoModel->descreption = request()->descreption;
-        $videoModel->channel = request()->user->id;
+        $videoModel->channel_id = request()->user->id;
 
         
         $duration = VideoManager::getDuration($fName);
@@ -183,10 +183,15 @@ class ShortsController extends Controller
 
             $short = Short::where('slug' , $slug)->first();
 
-            $shortView = new View([
-                'viewer' => request()->user->id,
-            ]); 
-            $short->views()->save($shortView);
+            $isSaved = $short->views()->where('viewer' , request()->user->id)->exists();
+            
+            if (!$isSaved){
+
+                $shortView = new View([
+                    'viewer' => request()->user->id,
+                ]); 
+                $short->views()->save($shortView);
+            }
 
 
 
@@ -199,27 +204,42 @@ class ShortsController extends Controller
         
         $short = Short::where('slug' , $slug)->first();
 
-        if ($short){
+        if (!$short){
+             return Response::push([
+                
+            ] , 404 , 'Video Not Found');
+        
+        }
+
+
 
             $this->saveShortdata($slug);
 
-            return Response::push([
-                'video' => $short->with([
+            $data = Short::whree('slug' , $slug)->with([
                     'reactions',
                     'views',
                     'channel',
                     'comments'
-                ])->where('slug' , $slug)->first()
+                ])->first();
+
+
+            $isSubscribed = data->getRelation('channel')->subscribers()
+                                            ->where('subscriber' , request()->user->id)
+                                            ->exists();
+
+            $channel = $data->getRelation('channel');
+
+            $channel->is_subscribed = $isSubscribed;
+
+            $data->setRelation('channel' , $channel);
+
+            return Response::push([
+                'video' => $data
             ] , 200 , 'Success');
 
             
 
-        }else{
-            return Response::push([
-                
-            ] , 404 , 'Video Not Found');
-        }
-
+      
 
 
 
@@ -240,9 +260,19 @@ class ShortsController extends Controller
                 'views',
                 'channel',
                 'comments',
-        ])->withCount('views' , 'reactions' , 'comments')->take($count)->get();
+                'channel.subscribers' => fn($q) => $q->where('subscriber' , request()->user->id)
+            ])->withCount('views' , 'reactions' , 'comments')->take($count)->get();
         
+        // Adding is_subscribed And Add View
 
+        $shorts->each(function($short) {
+
+            $short->channel->is_subscribed = $short->channel->subscribers->isNotEmpty();
+
+            $this->saveShortdata($short->slug);
+
+            return $short;
+        });
 
         return Response::push([
             'videos' => $shorts,

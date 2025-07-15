@@ -27,7 +27,7 @@ return new class extends Migration
             
             $table->string('slug');
             
-            $table->foreignId('channel')->constrained('users');
+            $table->foreignId('channel_id')->constrained('users');
             
             $table->timestamps();
         });

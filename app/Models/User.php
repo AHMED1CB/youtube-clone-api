@@ -26,7 +26,9 @@ class User extends Authenticatable
         'remember_token',
         'email_verified_at',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'email',
+
     ];
 
     protected $casts = [
@@ -35,11 +37,11 @@ class User extends Authenticatable
     ];
 
     public function videos(){
-        return $this->hasMany(Video::class , 'channel');
+        return $this->hasMany(Video::class , 'channel_id');
     }
 
     public function shorts(){
-        return $this->hasMany(Short::class , 'channel');
+        return $this->hasMany(Short::class , 'channel_id');
     }
 
 

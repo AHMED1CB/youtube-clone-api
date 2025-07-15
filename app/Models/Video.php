@@ -22,7 +22,7 @@ class Video extends Model
     
     public function channel()
     {
-        return $this->belongsTo(User::class , 'channel');
+        return $this->belongsTo(User::class , 'channel_id');
         
     }
 
