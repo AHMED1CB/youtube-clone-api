@@ -202,7 +202,7 @@ class ShortsController extends Controller
     public function getShortVideo($slug){
 
         
-        $short = Short::where('slug' , $slug)->first();
+        $short = Short::where('slug' , $slug)->exists();
 
         if (!$short){
              return Response::push([
@@ -215,23 +215,24 @@ class ShortsController extends Controller
 
             $this->saveShortdata($slug);
 
-            $data = Short::whree('slug' , $slug)->with([
+            $data = Short::with([
                     'reactions',
                     'views',
                     'channel',
                     'comments'
-                ])->first();
+                ])->withCount('comments' , 'reactions' , 'views')
+                 ->where('slug' , $slug)->first();
 
 
-            $isSubscribed = data->getRelation('channel')->subscribers()
+            $isSubscribed = $data->channel->subscribers()
                                             ->where('subscriber' , request()->user->id)
                                             ->exists();
 
-            $channel = $data->getRelation('channel');
 
-            $channel->is_subscribed = $isSubscribed;
+            $data->channel->is_subscribed = $isSubscribed;
+            $data->is_reacted = $data->reactions()->where('user_id' , request()->user->id)->exists();
 
-            $data->setRelation('channel' , $channel);
+
 
             return Response::push([
                 'video' => $data
@@ -260,7 +261,8 @@ class ShortsController extends Controller
                 'views',
                 'channel',
                 'comments',
-                'channel.subscribers' => fn($q) => $q->where('subscriber' , request()->user->id)
+                'channel.subscribers' => fn($q) => $q->where('subscriber' , request()->user->id),
+                'reactions' => fn($q) => $q->where('user_id' , request()->user->id)
             ])->withCount('views' , 'reactions' , 'comments')->take($count)->get();
         
         // Adding is_subscribed And Add View
@@ -268,6 +270,7 @@ class ShortsController extends Controller
         $shorts->each(function($short) {
 
             $short->channel->is_subscribed = $short->channel->subscribers->isNotEmpty();
+            $short->is_reacted = $short->reactions->isNotEmpty();
 
             $this->saveShortdata($short->slug);
 
